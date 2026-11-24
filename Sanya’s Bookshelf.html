@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sanya’s Bookshelf</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1c1a3a;--bg2:#27244d;--panel:#302c5c;--ink:#f1ecff;--muted:#b3acdc;--pink:#f7b6d2;--lav:#c9b6f7;--mint:#b8f0d4;--butter:#fbe7a6;--wood:#54406b;--wood2:#3f3055;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Quicksand',ui-rounded,'Segoe UI',system-ui,sans-serif;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+.stars{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--butter);animation:tw 3s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}
+/* lock */
+#lock{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 20%,#3a3470,var(--bg) 70%);padding:20px}
+.lockcard{position:relative;width:min(340px,100%);text-align:center;background:rgba(48,44,92,.75);border:2px solid var(--lav);border-radius:28px;padding:96px 26px 26px;margin-top:70px}
+.moon{position:absolute;top:-62px;left:50%;transform:translateX(-50%);width:110px;height:110px;border-radius:50%;background:var(--butter);box-shadow:0 0 40px 8px rgba(251,231,166,.45)}
+.moon::after{content:"";position:absolute;width:96px;height:96px;border-radius:50%;background:#3a3470;top:-12px;left:34px;box-shadow:0 0 0 0 #000}
+.lockcard h1{font-size:1.5rem;margin:0 0 4px}
+.lockcard p{margin:0 0 18px;color:var(--muted)}
+.field{display:block;text-align:left;margin-bottom:12px;font-weight:600;font-size:.9rem;color:var(--muted)}
+.field input,.field select{display:block;width:100%;margin-top:4px;padding:10px 14px;border-radius:14px;border:2px solid transparent;background:var(--bg);outline:none}
+.field input:focus,.field select:focus{border-color:var(--pink)}
+.btn{border:0;border-radius:999px;padding:10px 20px;font-weight:700;cursor:pointer;background:var(--pink);color:#3a2150}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--lav)}
+.btn.danger{background:transparent;color:#ffb0b0;border:2px solid #ffb0b0}
+.btn:focus-visible,.spine:focus-visible,.nav:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+#err{min-height:1.3em;color:#ffb0b0;font-weight:600;margin:6px 0 10px}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* app */
+#app{display:none;position:relative;min-height:100vh}
+#app.on{display:flex}
+aside{width:210px;flex:none;background:var(--bg2);padding:22px 14px;position:sticky;top:0;height:100vh}
+aside h2{font-size:1.15rem;margin:0 8px 18px}
+.nav{display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:14px;padding:10px 12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.nav.act{background:var(--panel);color:var(--ink)}
+.nav[disabled]{opacity:.5}
+main{flex:1;min-width:0;padding:26px 28px 60px;position:relative}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:6px}
+.top h1{margin:0;font-size:1.9rem;flex:1 1 220px}
+.sub{color:var(--muted);margin:0 0 18px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+.tools input,.tools select{padding:9px 14px;border-radius:999px;border:2px solid var(--panel);background:var(--bg2);outline:none;min-width:0}
+.tools input{flex:1 1 200px}
+.tools input:focus,.tools select:focus{border-color:var(--pink)}
+.case{background:linear-gradient(var(--bg2),#221f45);border:6px solid var(--wood);border-radius:14px;padding:18px 18px 0}
+.row{margin-bottom:0}
+.books{display:flex;align-items:flex-end;min-height:190px;padding:0 6px}
+.plank{height:16px;margin:0 -18px;background:linear-gradient(var(--wood),var(--wood2));border-radius:0 0 4px 4px;box-shadow:0 6px 10px rgba(0,0,0,.3)}
+.row+.row{margin-top:14px}
+.spine{position:relative;flex:none;border:0;border-radius:4px 4px 2px 2px;color:#33224a;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 0;margin-right:2px;box-shadow:inset -3px 0 0 rgba(0,0,0,.12),inset 2px 0 0 rgba(255,255,255,.35);transition:transform .15s}
+.spine:hover{transform:translateY(-8px)}
+.spine::before,.spine::after{content:"";position:absolute;left:0;right:0;height:3px;background:rgba(51,34,74,.3)}
+.spine::before{top:26px}.spine::after{bottom:30px}
+.spine b{writing-mode:vertical-rl;font-size:.82rem;font-weight:700;max-height:calc(100% - 70px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:30px}
+.spine small{font-size:.7rem;font-weight:700;position:absolute;bottom:6px}
+.ghost{flex:none;width:26px;border:2px dashed var(--muted);border-radius:4px;margin-right:2px;display:flex;align-items:flex-end;justify-content:center;color:var(--muted);font-size:.7rem;font-weight:700;padding-bottom:6px;opacity:.7}
+.gap{flex:none}
+.empty{padding:50px 10px;text-align:center;color:var(--muted)}
+/* modal */
+#modal{position:fixed;inset:0;z-index:10;background:rgba(15,13,35,.7);display:none;align-items:center;justify-content:center;padding:16px}
+#modal.on{display:flex}
+.sheet{width:min(420px,100%);max-height:100%;overflow:auto;background:var(--panel);border-radius:24px;padding:22px;border:2px solid var(--lav)}
+.sheet h3{margin:0 0 14px;font-size:1.25rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sw{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.sw button{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.sw button.on{border-color:#fff}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--mint);color:#1d3a30;padding:8px 18px;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+#toast.on{opacity:1}
+@media(max-width:720px){aside{display:none}main{padding:20px 14px 60px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<div id="lock">
+  <div class="lockcard" id="lockcard">
+    <div class="moon" aria-hidden="true"></div>
+    <h1>Sanya’s Library</h1>
+    <p>Shh, the books are sleeping. Sign in to wake them.</p>
+    <label class="field">Username<input id="u" autocomplete="off" value=""></label>
+    <label class="field">Password<input id="p" type="password" autocomplete="off"></label>
+    <div id="err" role="alert"></div>
+    <button class="btn" id="go">Open the library</button>
+  </div>
+</div>
+
+<div id="app">
+  <aside>
+    <h2>Sanya’s space</h2>
+    <button class="nav act">Bookshelf</button>
+    <button class="nav" disabled>More pages soon</button>
+  </aside>
+  <main>
+    <div class="top"><h1>My bookshelf</h1><button class="btn" id="add">Add a book</button></div>
+    <p class="sub" id="count"></p>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search title, author or series" aria-label="Search books">
+      <button class="btn ghost" id="exp">Export backup</button>
+      <button class="btn ghost" id="imp">Import backup</button>
+      <button class="btn ghost" id="demo" style="display:none">Remove sample books</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+    <div class="case" id="case"></div>
+  </main>
+</div>
+
+<div id="modal"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <h3 id="mt">Add a book</h3>
+  <label class="field">Title<input id="f-title"></label>
+  <label class="field">Author<input id="f-author"></label>
+  <div class="two">
+    <label class="field">Series<input id="f-series" list="series-list"></label>
+    <label class="field">Volume number<input id="f-vol" type="number" min="1"></label>
+  </div>
+  <datalist id="series-list"></datalist>
+  <div class="field" style="margin-bottom:0">Spine color</div>
+  <div class="sw" id="sw"></div>
+  <div class="acts"><button class="btn danger" id="del" style="margin-right:auto">Delete</button><button class="btn ghost" id="cancel">Cancel</button><button class="btn" id="save">Save book</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+var KEY='sanya-shelf-v1', COLORS=['#f7b6d2','#c9b6f7','#b6e3f7','#b8f0d4','#fbe7a6','#ffc8a8','#e0b8ff','#a8c6ff'];
+var books=load(), editId=null, color=COLORS[0];
+function $(i){return document.getElementById(i)}
+function uid(){return 'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function load(){
+  try{var r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}
+  var s=[['The Moonlit Garden','Ivy Hart','Moonlit Trilogy',1,0],['The Silver Door','Ivy Hart','Moonlit Trilogy',2,1],['The Last Lantern','Ivy Hart','Moonlit Trilogy',3,4],
+    ['Tea for Tiny Dragons','Mo Lin','Tiny Dragons',1,2],['Tiny Dragons Go West','Mo Lin','Tiny Dragons',3,3],['A Quiet Orchard','R. Vale','',null,5],['Stars Over Seattle','J. Park','',null,6],['The Paper Kite','Noor Amin','',null,7]];
+  return s.map(function(x){return{id:uid(),title:x[0],author:x[1],series:x[2],vol:x[3],color:COLORS[x[4]],status:'owned',demo:true}});
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(books))}catch(e){}}
+function toast(t){var e=$('toast');e.textContent=t;e.className='on';setTimeout(function(){e.className=''},1800)}
+function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)}
+
+/* stars */
+(function(){var s=$('stars');for(var i=0;i<45;i++){var d=document.createElement('i');d.style.left=Math.random()*100+'%';d.style.top=Math.random()*100+'%';d.style.animationDelay=(Math.random()*3)+'s';d.style.transform='scale('+(0.6+Math.random())+')';s.appendChild(d)}})();
+
+/* lock */
+function unlock(){
+  if($('u').value.trim()==='admin'&&$('p').value==='admin'){$('lock').style.display='none';$('app').className='on';render()}
+  else{$('err').textContent='That doesn’t match. Check the username and password and try again.';var c=$('lockcard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake')}
+}
+$('go').onclick=unlock;
+['u','p'].forEach(function(i){$(i).addEventListener('keydown',function(e){if(e.key==='Enter')unlock()})});
+
+/* shelf */
+function groups(list){
+  var map={},out=[];
+  list.forEach(function(b){
+    var k=b.series?'s:'+b.series.trim().toLowerCase():'t:'+b.id;
+    if(!map[k]){map[k]={name:(b.series||b.title).toLowerCase(),series:b.series,books:[]};out.push(map[k])}
+    map[k].books.push(b);
+  });
+  out.forEach(function(g){g.books.sort(function(a,b){return (a.vol||999)-(b.vol||999)||a.title.localeCompare(b.title)})});
+  out.sort(function(a,b){return a.name.localeCompare(b.name)});
+  return out;
+}
+function spineEl(b){
+  var h=hash(b.title),w=30+h%14,ht=150+(h>>3)%44;
+  var e=document.createElement('button');e.className='spine';e.style.cssText='width:'+w+'px;height:'+ht+'px;background:'+b.color;
+  e.title=b.title+' by '+(b.author||'unknown')+(b.series?' ('+b.series+(b.vol?' #'+b.vol:'')+')':'');
+  e.innerHTML='<b></b>'+(b.vol?'<small>'+b.vol+'</small>':'');
+  e.firstChild.textContent=b.title;
+  e.onclick=function(){openModal(b.id)};
+  return {el:e,w:w+2};
+}
+function render(){
+  var q=$('q').value.trim().toLowerCase();
+  var list=books.filter(function(b){return (!q||(b.title+' '+b.author+' '+b.series).toLowerCase().indexOf(q)>-1)});
+  var seriesCount={};books.forEach(function(b){if(b.series)seriesCount[b.series.toLowerCase()]=1});
+  $('count').textContent=books.length+(books.length===1?' book':' books')+' on the shelf'+(Object.keys(seriesCount).length?' across '+Object.keys(seriesCount).length+(Object.keys(seriesCount).length===1?' series':' series'):'');
+  $('demo').style.display=books.some(function(b){return b.demo})?'':'none';
+  var dl=$('series-list');dl.innerHTML='';Object.keys(books.reduce(function(a,b){if(b.series)a[b.series]=1;return a},{})).forEach(function(s){var o=document.createElement('option');o.value=s;dl.appendChild(o)});
+  var cs=$('case');cs.innerHTML='';
+  if(!list.length){cs.innerHTML='<div class="empty">'+(books.length?'No books match that search.':'The shelf is empty. Add your first book to start the collection.')+'</div><div class="plank"></div>';return}
+  var items=[],showGhost=!q;
+  groups(list).forEach(function(g,gi){
+    var vols=g.books.map(function(b){return b.vol}).filter(Boolean),max=Math.max.apply(null,vols.concat([0])),have={};vols.forEach(function(v){have[v]=1});
+    g.books.forEach(function(b){var s=spineEl(b);s.vol=b.vol||999;items.push(s)});
+    if(showGhost&&g.series&&max>1)for(var v=1;v<max;v++)if(!have[v]){var el=document.createElement('div');el.className='ghost';el.title='Missing: '+g.series+' #'+v;el.textContent=v;var pos=0;items.forEach(function(it){});items.push({el:el,w:28,ghost:v,vol:v,series:g.series,group:gi})}
+    items.push({gapEl:true,w:16,gi:gi});
+  });
+  /* order ghosts inside their series by volume */
+  var ordered=[],cur=[];
+  items.forEach(function(it){if(it.gapEl){cur.sort(function(a,b){return (a.vol||a.sortVol||0)-(b.vol||b.sortVol||0)});ordered=ordered.concat(cur,[it]);cur=[]}else cur.push(it)});
+  /* spines need volume for sorting with ghosts */
+  var avail=cs.clientWidth-48,rowW=0,row=null;
+  function newRow(){var r=document.createElement('div');r.className='row';var b=document.createElement('div');b.className='books';r.appendChild(b);var p=document.createElement('div');p.className='plank';r.appendChild(p);cs.appendChild(r);row=b;rowW=0}
+  newRow();
+  ordered.forEach(function(it){
+    if(it.gapEl){if(row.children.length){var g=document.createElement('div');g.className='gap';g.style.width='16px';row.appendChild(g);rowW+=16}return}
+    if(rowW+it.w>avail&&row.children.length){newRow()}
+    row.appendChild(it.el);rowW+=it.w;
+  });
+}
+window.addEventListener('resize',function(){if($('app').className==='on')render()});
+$('q').addEventListener('input',render);
+
+/* modal */
+function swatches(){var s=$('sw');s.innerHTML='';COLORS.forEach(function(c){var b=document.createElement('button');b.type='button';b.style.background=c;b.setAttribute('aria-label','Spine color '+c);b.className=c===color?'on':'';b.onclick=function(){color=c;swatches()};s.appendChild(b)})}
+function openModal(id){
+  editId=id;var b=books.filter(function(x){return x.id===id})[0];
+  $('mt').textContent=b?'Edit book':'Add a book';
+  $('f-title').value=b?b.title:'';$('f-author').value=b?b.author:'';$('f-series').value=b?b.series:'';$('f-vol').value=b&&b.vol?b.vol:'';
+  color=b?b.color:COLORS[Math.floor(Math.random()*COLORS.length)];swatches();
+  $('del').style.display=b?'':'none';$('modal').className='on';$('f-title').focus();
+}
+function closeModal(){$('modal').className=''}
+$('add').onclick=function(){openModal(null)};
+$('cancel').onclick=closeModal;
+$('modal').addEventListener('click',function(e){if(e.target===$('modal'))closeModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+$('save').onclick=function(){
+  var t=$('f-title').value.trim();if(!t){$('f-title').focus();toast('Add a title first');return}
+  var rec={title:t,author:$('f-author').value.trim(),series:$('f-series').value.trim(),vol:parseInt($('f-vol').value,10)||null,color:color};
+  if(editId){books=books.map(function(b){if(b.id===editId){var n=Object.assign({},b,rec);return n}return b})}
+  else books.push(Object.assign({id:uid()},rec));
+  save();closeModal();render();toast('Book saved');
+};
+$('del').onclick=function(){books=books.filter(function(b){return b.id!==editId});save();closeModal();render();toast('Book removed')};
+$('demo').onclick=function(){books=books.filter(function(b){return !b.demo});save();render();toast('Sample books removed')};
+
+/* backup */
+$('exp').onclick=function(){
+  var a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(books,null,1));a.download='bookshelf-backup.json';
+  try{a.click()}catch(e){}
+  toast('Backup started');
+};
+$('imp').onclick=function(){$('file').click()};
+$('file').onchange=function(e){
+  var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;books=d;save();render();toast('Backup loaded')}catch(x){toast('That file isn’t a bookshelf backup')}};
+  r.readAsText(f);e.target.value='';
+};
+</script>
+</body>
+</html>
